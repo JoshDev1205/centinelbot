@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\DB;	
+use Illuminate\Support\Facades\DB;
+
+use App\Cliente; 	
 
 class botController extends Controller
 {
@@ -58,22 +60,67 @@ class botController extends Controller
 			$is_echo = isset($postArray[0]['message']['is_echo']);
 		} 
 		
-		$newCliente=$this->getData($sender);
-											
-		$first_name=$newCliente->first_name;
-		$second_name=$newCliente->last_name;
-							
-		$reply = ["text" =>'Hola '.$first_name.', soy CentinelBot ¿Como te ayudamos hoy?'];
-		$this->sendToFbMessenger($sender,$reply);  
+		 
+		$client_est = DB::select("SELECT estado FROM clientes WHERE sender='".$sender."'") ; 
 		
-		$this->sendToFbMessenger($sender,$this->printOptions());    
-		
-		
-		
+		if(!empty($client_est) && $client_est[0]->estado===1){
+			//evento is postback
+			if($postback){ 
+				$reply=null;		
+				switch($postback) {
+					CASE 'EMER':
+						$reply=$this->printIncidentes();
+						
+						break;
+					CASE 'SUGER':
+						$reply = ["text" =>'Comentanos...'];
+						
+						$client = DB::select("SELECT id FROM clientes WHERE sender='".$sender."'") ;  
+						$cliente=Cliente::find($client[0]->id);
+						$cliente->estado=0;											
+						$cliente->save(); 					
+						break;
+					CASE 'ROBO':	
+						$reply = ["text" =>'esto es un asalto!! XD'];
+						break;
+				} 	
+				$this->sendToFbMessenger($sender,$reply);  
+			}else{
+				
+				$client = DB::select("SELECT primer_nombre,segundo_nombre FROM clientes WHERE sender='".$sender."'") ;  
+				
+				if(empty($client)){
+					
+					$newCliente=$this->getData($sender);
+												
+					$first_name=$newCliente->first_name;
+					$second_name=$newCliente->last_name;
+				
+					$cliente = new Cliente;     
+					$cliente->sender=$sender;  
+					$cliente->primer_nombre=$first_name;
+					$cliente->segundo_nombre=$second_name;
+					$cliente->estado=1;  
+					$cliente->save();  
+				}else{
+					$first_name=$client[0]->primer_nombre;	  
+				}
+				
+				
+				
+				
+				
+									
+				$reply = ["text" =>'Hola '.$first_name.', soy CentinelBot ¿Como te ayudamos hoy?'];
+				$this->sendToFbMessenger($sender,$reply);  
+				
+				$this->sendToFbMessenger($sender,$this->printOptions());  	
+			}
+		}//end if estado
 	}	
 	
 	protected function printOptions(){
-		$servicios = DB::select('SELECT nombre,descripcion,imagen,payload FROM incidentes LIMIT 8;') ;
+		$servicios = DB::select('SELECT nombre,descripcion,foto,payload FROM servicio LIMIT 8;') ;
 		$reply =[
 				"attachment"=>[
 					"type"=>"template",	
@@ -84,17 +131,17 @@ class botController extends Controller
 					] 
 				]	
 			];
-						  
+						   
 			foreach($servicios as $servicio){  						
 				$el=[	
 					"title"=>$servicio->nombre,	
-					"image_url"=>"https://centinelbot.com/imagenes/".$servicio->imagen, 		
+					"image_url"=>"https://centinelbot.com/imagenes/".$servicio->foto, 		
 					"subtitle"=>$servicio->descripcion, 	
 					"buttons"=>[	
 						[ 
 						"type"=> "postback",		
-						"title"=> "SELECCIONAR", 			         		
-						"payload"=> $servicio->payload,
+						"title"=> "SELECCIONAR", 			         		 
+						"payload"=> $servicio->payload,  
 						]    
 					]     		 						
 				];
@@ -105,6 +152,40 @@ class botController extends Controller
 			}
 			return $reply;
 			
+	}
+	
+	protected function printIncidentes(){	
+		$incidentes = DB::select("SELECT nombre,descripcion,imagen,payload FROM incidentes ORDER BY orden ASC LIMIT 8;") ;
+		$reply =[
+				"attachment"=>[
+					"type"=>"template",	
+					"payload"=>[
+						"template_type"=>"generic",
+						"elements"=>[
+						]
+					] 
+				]	
+			]; 
+						   
+			foreach($incidentes as $incidente){  						
+				$el=[	
+					"title"=>$incidente->nombre,	
+					"image_url"=>"https://centinelbot.com/imagenes/".$incidente->imagen, 		
+					"subtitle"=>$incidente->descripcion, 	
+					"buttons"=>[	  
+						[ 
+						"type"=> "postback",		
+						"title"=> "SELECCIONAR", 			           		 
+						"payload"=> $incidente->payload,  
+						]    
+					]     		 						
+				];
+   
+									
+				array_push($reply["attachment"]["payload"]["elements"],$el);
+				
+			}
+			return $reply;
 	}
 	
 	//Envia peticion con el mensaje  
