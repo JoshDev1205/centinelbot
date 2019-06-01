@@ -36,7 +36,8 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~/plugins/vue-good-table.js'
+    '~/plugins/vue-good-table.js',
+    '~/plugins/firebase.js'
     // { src: }
   ],
 
