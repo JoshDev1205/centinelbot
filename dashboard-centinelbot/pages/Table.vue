@@ -1,11 +1,14 @@
 <template>
-  <vue-good-table
-    class="pt-4 shadow-lg"
-    :columns="columns"
-    :rows="rows"
-  />
-  <!-- </vue-good-table> -->
-  <!-- <h1>table</h1> -->
+  <div>
+    <p class="description-text">
+      Estas son las emergencias registrados:
+    </p>
+    <vue-good-table
+      class="pt-4 shadow-lg table-style"
+      :columns="columns"
+      :rows="data"
+    />
+  </div>
 </template>
 
 <script>
@@ -15,36 +18,37 @@ export default {
     return {
       columns: [
         {
-          label: 'Name',
-          field: 'name'
+          label: 'UBICACIÓN',
+          field: 'ubicacion'
         },
         {
-          label: 'Age',
-          field: 'age',
-          type: 'number'
+          label: 'TELÉFONO',
+          field: 'telefono'
         },
         {
-          label: 'Created On',
-          field: 'createdAt',
-          type: 'date',
-          dateInputFormat: 'YYYY-MM-DD',
-          dateOutputFormat: 'MMM Do YY'
+          label: 'DETALLE',
+          field: 'detalle'
         },
         {
-          label: 'Percent',
-          field: 'score',
-          type: 'percentage'
+          label: 'ESTADO',
+          field: 'estado'
         }
-      ],
-      rows: [
-        { id: 1, name: 'John', age: 20, createdAt: '201-10-31:9: 35 am', score: 0.03343 },
-        { id: 2, name: 'Jane', age: 24, createdAt: '2011-10-31', score: 0.03343 },
-        { id: 3, name: 'Susan', age: 16, createdAt: '2011-10-30', score: 0.03343 },
-        { id: 4, name: 'Chris', age: 55, createdAt: '2011-10-11', score: 0.03343 },
-        { id: 5, name: 'Dan', age: 40, createdAt: '2011-10-21', score: 0.03343 },
-        { id: 6, name: 'John', age: 20, createdAt: '2011-10-31', score: 0.03343 }
       ]
     }
+  },
+  async asyncData({ $axios }) {
+    const data = await $axios.$get('http://localhost:3000/emergencias')
+    return { data }
   }
 }
 </script>
+
+<style>
+.table-style{
+  margin: 20px auto;
+}
+.description-text{
+  margin-top: 2rem;
+  padding: 0 18px;
+}
+</style>
