@@ -26,13 +26,11 @@ class botController extends Controller
     public function postWebhook(Request $request) 
     {
 		
-		
+		/*
 		$client = new \GuzzleHttp\Client;  
-		$res = $client->request('POST', 'https://webhook.site/8e94ea7b-254c-42a8-a8dc-5c6258f7a068',["hola"=>2]);
+		$res = $client->request('POST', 'https://webhook.site/8e94ea7b-254c-42a8-a8dc-5c6258f7a068',["hola"=>"asdasd"]);
 		
-		return response($res->getBody(), 200); 	   
-				
-		   
+		*/
 
 		
 		$has_message = false;
@@ -60,8 +58,53 @@ class botController extends Controller
 			$is_echo = isset($postArray[0]['message']['is_echo']);
 		} 
 		
-		$reply = ["text" =>'holla'];
-							$this->sendToFbMessenger($sender,$reply);  
+		$newCliente=$this->getData($sender);
+											
+		$first_name=$newCliente->first_name;
+		$second_name=$newCliente->last_name;
+							
+		$reply = ["text" =>'Hola '.$first_name.', soy CentinelBot ¿Como te ayudamos hoy?'];
+		$this->sendToFbMessenger($sender,$reply);  
+		
+		$this->sendToFbMessenger($sender,$this->printOptions());    
+		
+		
+		
+	}	
+	
+	protected function printOptions(){
+		$servicios = DB::select('SELECT nombre,descripcion,imagen,payload FROM incidentes LIMIT 8;') ;
+		$reply =[
+				"attachment"=>[
+					"type"=>"template",	
+					"payload"=>[
+						"template_type"=>"generic",
+						"elements"=>[
+						]
+					] 
+				]	
+			];
+						  
+			foreach($servicios as $servicio){  						
+				$el=[	
+					"title"=>$servicio->nombre,	
+					"image_url"=>"https://centinelbot.com/imagenes/".$servicio->imagen, 		
+					"subtitle"=>$servicio->descripcion, 	
+					"buttons"=>[	
+						[ 
+						"type"=> "postback",		
+						"title"=> "SELECCIONAR", 			         		
+						"payload"=> $servicio->payload,
+						]    
+					]     		 						
+				];
+   
+									
+				array_push($reply["attachment"]["payload"]["elements"],$el);
+				
+			}
+			return $reply;
+			
 	}
 	
 	//Envia peticion con el mensaje  
@@ -77,5 +120,15 @@ class botController extends Controller
 		$res = $client->request('POST', 'https://graph.facebook.com/v2.6/me/messages?access_token='.env('FB_TOKEN'),$data); 
 		
 		return response($res->getBody(), 200);  	
+	}
+	
+	//Obtener perfil del usuario apartir de su id
+	protected function getData($idUser){ 		
+		$userFb = new \GuzzleHttp\Client; 
+		$response = $userFb->request('GET','https://graph.facebook.com/'.$idUser.'?fields=first_name,last_name&access_token='.env('FB_TOKEN'));
+		
+		$data=json_decode($response->getBody()->getContents());
+		
+		return $data;						
 	}
 }
