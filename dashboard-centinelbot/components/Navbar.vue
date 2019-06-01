@@ -1,5 +1,5 @@
 <template>
-  <nav>
+  <nav class="h-12 flex items-center">
     <span>Hello</span>
   </nav>
 </template>
