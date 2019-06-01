@@ -1,12 +1,11 @@
 <template>
-  <div>
-    <vue-good-table
-      :columns="columns"
-      :rows="rows"
-    />
-    <!-- </vue-good-table> -->
-    <!-- <h1>table</h1> -->
-  </div>
+  <vue-good-table
+    class="pt-4"
+    :columns="columns"
+    :rows="rows"
+  />
+  <!-- </vue-good-table> -->
+  <!-- <h1>table</h1> -->
 </template>
 
 <script>

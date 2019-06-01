@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-red-200">
+  <section class="bg-red-200  ">
     <div>
       <logo />
       <h1 class="title">
