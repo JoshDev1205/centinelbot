@@ -7,6 +7,11 @@
       class="pt-4 shadow-lg table-style"
       :columns="columns"
       :rows="data"
+      :pagination-options="{
+        enabled: true,
+        mode: 'records',
+        perPage: 5
+      }"
     />
   </div>
 </template>
@@ -37,7 +42,7 @@ export default {
     }
   },
   async asyncData({ $axios }) {
-    const data = await $axios.$get('http://localhost:3000/emergencias')
+    const data = await $axios.$get('http://localhost:3333/emergencias')
     return { data }
   }
 }
