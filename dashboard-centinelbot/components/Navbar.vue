@@ -15,12 +15,7 @@ export default {
 </script>
 
 <style lang="css" scoped>
-  .navbar_style {
-    background-color: #1C3959;
-    color: #FFFF;
-  }
   .bg_dark_blue {
     background-color: #1C3959;
   }
-  /* .bet */
 </style>
