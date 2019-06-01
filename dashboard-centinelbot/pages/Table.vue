@@ -1,6 +1,6 @@
 <template>
   <vue-good-table
-    class="pt-4"
+    class="pt-4 shadow-lg"
     :columns="columns"
     :rows="rows"
   />
