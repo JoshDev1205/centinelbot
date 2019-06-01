@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="description-text">
+    <p class="font-bold text-blue-900 pt-4">
       Estas son las emergencias registrados:
     </p>
     <vue-good-table
@@ -47,8 +47,5 @@ export default {
 .table-style{
   margin: 20px auto;
 }
-.description-text{
-  margin-top: 2rem;
-  padding: 0 18px;
-}
+
 </style>
